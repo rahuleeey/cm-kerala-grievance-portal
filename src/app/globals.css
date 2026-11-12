@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #f8fafc;
+    color: #0f172a;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  input, textarea, select {
+    color: #0f172a !important;
+    background-color: #ffffff;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: #64748b !important;
+    opacity: 1;
+  }
+}

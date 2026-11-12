@@ -1,0 +1,99 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  CITIZEN
+  CMO_ADMIN
+  OFFICER
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum Status {
+  SUBMITTED
+  UNDER_REVIEW
+  IN_PROGRESS
+  RESOLVED
+  REOPENED
+}
+
+model User {
+  id           String             @id @default(uuid())
+  name         String
+  email        String             @unique
+  mobile       String?
+  password     String
+  role         Role               @default(CITIZEN)
+  departmentId String?
+  department   Department?        @relation(fields: [departmentId], references: [id])
+  grievances   Grievance[]        @relation("CitizenGrievances")
+  actions      GrievanceHistory[]
+  createdAt    DateTime           @default(now())
+}
+
+model Department {
+  id          String      @id @default(uuid())
+  name        String      @unique
+  code        String      @unique
+  description String
+  grievances  Grievance[]
+  officers    User[]
+  createdAt   DateTime    @default(now())
+}
+
+model Grievance {
+  id                  String             @id @default(uuid())
+  trackingId          String             @unique
+  citizenId           String
+  citizen             User               @relation("CitizenGrievances", fields: [citizenId], references: [id])
+  district            String
+  category            String
+  subject             String
+  description         String
+  attachmentUrl       String?
+  priority            Priority           @default(MEDIUM)
+  status              Status             @default(SUBMITTED)
+  departmentId        String?
+  department          Department?        @relation(fields: [departmentId], references: [id])
+  aiSummary           String?
+  aiSuggestedDept     String?
+  aiSuggestedPriority Priority?
+  cmoRemarks          String?
+  officerReport       String?
+  feedbackRating      Int?
+  feedbackText        String?
+  history             GrievanceHistory[]
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+}
+
+model GrievanceHistory {
+  id          String    @id @default(uuid())
+  grievanceId String
+  grievance   Grievance @relation(fields: [grievanceId], references: [id], onDelete: Cascade)
+  actionById  String
+  actionBy    User      @relation(fields: [actionById], references: [id])
+  fromStatus  Status
+  toStatus    Status
+  remarks     String?
+  createdAt   DateTime  @default(now())
+}
+
+model ContactEnquiry {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  createdAt DateTime @default(now())
+}
